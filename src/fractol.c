@@ -6,7 +6,7 @@
 /*   By: mobushi <mobushi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/04 01:46:07 by mobushi           #+#    #+#             */
-/*   Updated: 2023/05/04 13:15:24 by mobushi          ###   ########.fr       */
+/*   Updated: 2023/05/04 14:35:23 by mobushi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,17 +71,20 @@ void plot_mandelbrot(size_t x,size_t y,t_data *mlx)
 	size_t i;
 	double real_num;
 	double imaginary_num;
-	i=0;
+	double tmp;
+
+	i=1;
 	while(i < MAX_ITER)
 	{
+		tmp = real_num;
 		real_num = real_num*real_num  - imaginary_num*imaginary_num + x;
-		imaginary_num = 2*real_num*imaginary_num+y;
+		imaginary_num = 2*tmp*imaginary_num+y;
 
 		if(real_num * real_num + imaginary_num*imaginary_num > 4)
 		{
 				mlx_pixel_put(mlx->mlx, mlx->win, mlx->x_pixel, mlx->y_pixel,
-				(mlx->color) + 0x0000FF00 * i);//4bitづつ指定可能、 mlxは255 255 255でTRGB 試行回数が多いほど濃くなるようにset
-		return ;
+				(mlx->color) + 0x008DE3EC * i);//4bitづつ指定可能、 mlxは255 255 255でTRGB 試行回数が多いほど濃くなるようにset
+			return ;
 		}
 		i++;
 	}
@@ -96,7 +99,7 @@ void plot_coordinates(t_data* mlx)
 	mlx->y_pixel = 0;
 	double x = 0;
 	double y = 0;
-	
+	mlx_clear_window(mlx->mlx, mlx->win);
 	while(mlx->x_pixel < SIZEX)
 	{
 		mlx->y_pixel = 0;
@@ -125,7 +128,7 @@ void plot_fractol(t_data* mlx,size_t flag)
 		mlx->color = 0;
 	}
 	plot_coordinates(mlx);
-	mlx_clear_window(mlx->mlx, mlx->win);
+	
 	//mlx_key_hook(mlx->win, keys, (void *)&mlx);
 	mlx_mouse_hook(mlx->win, zoom, (void *)&mlx);
 	mlx_hook(mlx->win, 17, 2, ft_close, (void *)0);
@@ -141,6 +144,7 @@ int main (int argc, char **argv)
 
 	if(ft_strcmp(argv[1],"Mandelbrot") && argc == 2)
 	{
+		printf("hi");
 		mlx.fractol_type = 0;
 		 plot_fractol(&mlx,0);
 	}
