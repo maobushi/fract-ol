@@ -6,12 +6,12 @@
 /*   By: mobushi <mobushi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/04 01:46:07 by mobushi           #+#    #+#             */
-/*   Updated: 2023/05/04 12:55:59 by mobushi          ###   ########.fr       */
+/*   Updated: 2023/05/04 13:15:24 by mobushi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fractol.h"
-#include <mlx.h>
+
 
 bool	ft_strcmp(const char *s1, const char *s2)
 {
@@ -57,10 +57,9 @@ int	zoom(int keycode,t_data *mlx)
 		mlx->ymax = (mlx->ymax + ((dy * mlx->ymin + mlx->ymax /2) * 0.5));
 		mlx->ymin = (mlx->ymin - ((dy * (SIZEY - mlx->ymin + mlx->ymax /2)) * 0.5));
 	}
-	ft_run(mlx, 1);
 	return (0);
 }
-int	ft_close(int keycode, t_data *mlx)
+int	ft_close(t_data *mlx)
 {
 	mlx_destroy_window(mlx->mlx, mlx->win);
 	exit(1);
@@ -72,7 +71,7 @@ void plot_mandelbrot(size_t x,size_t y,t_data *mlx)
 	size_t i;
 	double real_num;
 	double imaginary_num;
-
+	i=0;
 	while(i < MAX_ITER)
 	{
 		real_num = real_num*real_num  - imaginary_num*imaginary_num + x;
@@ -82,13 +81,13 @@ void plot_mandelbrot(size_t x,size_t y,t_data *mlx)
 		{
 				mlx_pixel_put(mlx->mlx, mlx->win, mlx->x_pixel, mlx->y_pixel,
 				(mlx->color) + 0x0000FF00 * i);//4bitづつ指定可能、 mlxは255 255 255でTRGB 試行回数が多いほど濃くなるようにset
-		return (0);
+		return ;
 		}
 		i++;
 	}
 	mlx_pixel_put(mlx->mlx, mlx->win, mlx->x_pixel, mlx->y_pixel,
 				(mlx->color) + 0x008DE3EC * i);//4bitづつ指定可能、 mlxは255 255 255でTRGB 試行回数が多いほど濃くなるようにset
-	return(0);
+	return;
 }
 
 void plot_coordinates(t_data* mlx)
@@ -106,11 +105,11 @@ void plot_coordinates(t_data* mlx)
 			x = mlx->xmin + (mlx->x_pixel * ((mlx->xmax - mlx->xmin) / SIZEX));
 			y = mlx->ymin + (mlx->y_pixel * ((mlx->ymax - mlx->ymin) / SIZEY));
 			mlx->y_pixel++;
-			plot_mandelbrot(x,y,&mlx);
+			plot_mandelbrot(x,y,mlx);
 		}
 		mlx->x_pixel++;
 	}
-	return(0);
+	return;
 }
 
 void plot_fractol(t_data* mlx,size_t flag)
@@ -125,7 +124,7 @@ void plot_fractol(t_data* mlx,size_t flag)
 		mlx->ymax = MAXY;//座標の指定,2がbest);
 		mlx->color = 0;
 	}
-	plot_coordinates(&mlx);
+	plot_coordinates(mlx);
 	mlx_clear_window(mlx->mlx, mlx->win);
 	//mlx_key_hook(mlx->win, keys, (void *)&mlx);
 	mlx_mouse_hook(mlx->win, zoom, (void *)&mlx);

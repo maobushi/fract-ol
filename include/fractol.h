@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <mlx.h>
 
 #define SIZEX 700
 #define SIZEY 700
