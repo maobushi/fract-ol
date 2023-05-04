@@ -6,11 +6,12 @@
 /*   By: mobushi <mobushi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/04 01:46:07 by mobushi           #+#    #+#             */
-/*   Updated: 2023/05/04 03:15:11 by mobushi          ###   ########.fr       */
+/*   Updated: 2023/05/04 12:55:59 by mobushi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fractol.h"
+#include <mlx.h>
 
 bool	ft_strcmp(const char *s1, const char *s2)
 {
@@ -35,25 +36,121 @@ int print_available_parameters()
 	return(1);
 }
 
-int plot_mandelbrot(void)
+int	zoom(int keycode,t_data *mlx)
 {
-	printf("mandelbrot!");
-	return 0;	
+	double	dx;
+	double	dy;
+
+	dx = (mlx->xmax - mlx->xmin) / SIZEX;
+	dy = (mlx->ymax - mlx->ymin) / SIZEY;
+	if (keycode == 5)
+	{
+		mlx->xmin = (mlx->xmin + ((dx * mlx->xmin + mlx->xmax /2) * 0.5));
+		mlx->xmax = (mlx->xmax - ((dx * (SIZEX - mlx->xmin + mlx->xmax /2)) * 0.5));
+		mlx->ymax = (mlx->ymax - ((dy * mlx->ymin + mlx->ymax /2) * 0.5));
+		mlx->ymin = (mlx->ymin + ((dy * (SIZEY - mlx->ymin + mlx->ymax /2)) * 0.5));
+	}
+	if (keycode == 4)
+	{
+		mlx->xmin = (mlx->xmin - ((dx * mlx->xmin + mlx->xmax /2) * 0.5));
+		mlx->xmax = (mlx->xmax + ((dx * (SIZEX - mlx->xmin + mlx->xmax /2)) * 0.5));
+		mlx->ymax = (mlx->ymax + ((dy * mlx->ymin + mlx->ymax /2) * 0.5));
+		mlx->ymin = (mlx->ymin - ((dy * (SIZEY - mlx->ymin + mlx->ymax /2)) * 0.5));
+	}
+	ft_run(mlx, 1);
+	return (0);
+}
+int	ft_close(int keycode, t_data *mlx)
+{
+	mlx_destroy_window(mlx->mlx, mlx->win);
+	exit(1);
+	return (1);
 }
 
-int plot_julia(void)
+void plot_mandelbrot(size_t x,size_t y,t_data *mlx)
 {
-	printf("Julia!");
-	return 0;
+	size_t i;
+	double real_num;
+	double imaginary_num;
+
+	while(i < MAX_ITER)
+	{
+		real_num = real_num*real_num  - imaginary_num*imaginary_num + x;
+		imaginary_num = 2*real_num*imaginary_num+y;
+
+		if(real_num * real_num + imaginary_num*imaginary_num > 4)
+		{
+				mlx_pixel_put(mlx->mlx, mlx->win, mlx->x_pixel, mlx->y_pixel,
+				(mlx->color) + 0x0000FF00 * i);//4bitづつ指定可能、 mlxは255 255 255でTRGB 試行回数が多いほど濃くなるようにset
+		return (0);
+		}
+		i++;
+	}
+	mlx_pixel_put(mlx->mlx, mlx->win, mlx->x_pixel, mlx->y_pixel,
+				(mlx->color) + 0x008DE3EC * i);//4bitづつ指定可能、 mlxは255 255 255でTRGB 試行回数が多いほど濃くなるようにset
+	return(0);
+}
+
+void plot_coordinates(t_data* mlx)
+{
+	mlx->x_pixel = 0;
+	mlx->y_pixel = 0;
+	double x = 0;
+	double y = 0;
+	
+	while(mlx->x_pixel < SIZEX)
+	{
+		mlx->y_pixel = 0;
+		while(mlx->y_pixel < SIZEY)
+		{
+			x = mlx->xmin + (mlx->x_pixel * ((mlx->xmax - mlx->xmin) / SIZEX));
+			y = mlx->ymin + (mlx->y_pixel * ((mlx->ymax - mlx->ymin) / SIZEY));
+			mlx->y_pixel++;
+			plot_mandelbrot(x,y,&mlx);
+		}
+		mlx->x_pixel++;
+	}
+	return(0);
+}
+
+void plot_fractol(t_data* mlx,size_t flag)
+{
+	if(flag == 0)
+	{
+		mlx->mlx = mlx_init();
+		mlx->win = mlx_new_window(mlx->mlx, SIZEX, SIZEY, "Fract'ol");
+		mlx->xmin = MINX;//mandelbrotのxmin(座標の指定,-2がbest)
+		mlx->xmax = MAXX;//mandelbrotのxmax(座標の指定,2がbest)
+		mlx->ymin = MINY;//座標の指定,-2がbest);
+		mlx->ymax = MAXY;//座標の指定,2がbest);
+		mlx->color = 0;
+	}
+	plot_coordinates(&mlx);
+	mlx_clear_window(mlx->mlx, mlx->win);
+	//mlx_key_hook(mlx->win, keys, (void *)&mlx);
+	mlx_mouse_hook(mlx->win, zoom, (void *)&mlx);
+	mlx_hook(mlx->win, 17, 2, ft_close, (void *)0);
+	mlx_loop(mlx->mlx);
 }
 
 int main (int argc, char **argv)
 {
-	if(ft_strcmp(argv[1],"Mandelbrot") && argc == 1)
-		printf
-		// plot_mandelbrot();
-	// else if (ft_strcmp(argv[1],"Julia") && argc == 2)  
-		// plot_julia();
-	// else
-		// return(print_available_parameters());
+	//printf("argc = %d\n",argc);
+	//printf("argv[1] = %s\n",argv[1]);
+	//printf("argv[2] = %s\n",argv[2]);
+	t_data mlx;
+
+	if(ft_strcmp(argv[1],"Mandelbrot") && argc == 2)
+	{
+		mlx.fractol_type = 0;
+		 plot_fractol(&mlx,0);
+	}
+	 else if (ft_strcmp(argv[1],"Julia") && argc == 3)  
+	{
+		mlx.fractol_type = 1;
+		 plot_fractol(&mlx,0);
+	}
+	else
+		 return(print_available_parameters());
+	return 0;
 }
