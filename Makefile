@@ -43,7 +43,8 @@ FILES = srcs/additional_function.c srcs/fractol.c srcs/mandelbrot.c
 CFLAGS = -Werror -Wextra -Wall
 #XFLAGS = -I /usr/local/include -lmlx -framework OpenGL -framework AppKit
 
-OBJECTS = obj
+OBJECTS = $(FILES:.c=.o)
+OBJDIR = obj
 NAME = fractol
 HEADER = include
 CC = cc
@@ -70,7 +71,7 @@ startall:
 	$(shell ./fractol Mandelbrot & ./fractol Julia)
 
 clean:
-	rm -rf  $(OBJECTS)
+	$(RM) -r $(OBJECTS)
 
 fclean: clean
 	$(RM) $(NAME)

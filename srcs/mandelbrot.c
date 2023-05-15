@@ -6,7 +6,7 @@
 /*   By: mobushi <mobushi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/14 20:21:36 by mobushi           #+#    #+#             */
-/*   Updated: 2023/05/14 22:56:37 by mobushi          ###   ########.fr       */
+/*   Updated: 2023/05/15 18:36:51 by mobushi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,26 +20,27 @@ int	mandelbrot_set(double x, double y, t_data *mlx)
 	double	yy;
 	double	temp;
 
-
-	//Mandelbrot
-	//xx = 0;
-	//yy = 0;
-
-	//Julia
-	xx = x;
-	yy = y;
-	
-	
+	if (mlx->fractol_type == 0)
+	{
+		xx = 0;
+		yy = 0;
+	}
+	else
+	{
+		xx = x;
+		yy = y;
+	}
 	i = 1;
-	while (i < 120)
+	while (i < MAX_ITER)
 	{
 		temp = xx;
 		xx = ((xx * xx) - (yy * yy)) + x;
 		yy = (2 * temp * yy) + y;
+		xx += (double)mlx->fractol_type;
+		yy += (double)mlx->fractol_type;
 		if ((xx * xx) + (yy * yy) > 4)
 		{
-			mlx_pixel_put(mlx->mlx, mlx->win, mlx->loopx, mlx->loopy,
-				(mlx->color) + 0x008DE3EC * i);
+			mlx_pixel_put(mlx->mlx, mlx->win, mlx->loopx,mlx->loopy, 0xE00009EA * i);
 			return (0);
 		}
 		i++;
@@ -60,8 +61,8 @@ int	mandelbrot(t_data *mlx)
 	{
 		while (mlx->loopx < SIZEX)
 		{
-			x = mlx->xmin + (mlx->loopx * ((mlx->xmax - mlx->xmin) / SIZEX));
-			y = mlx->ymax - (mlx->loopy * ((mlx->ymax - mlx->ymin) / SIZEY));
+			x = (double)mlx->xmin + ((double)mlx->loopx * (((double)mlx->xmax - (double)mlx->xmin) / (double)SIZEX));
+			y = (double)mlx->ymax - ((double)mlx->loopy * (((double)mlx->ymax - (double)mlx->ymin) / (double)SIZEY));
 			mandelbrot_set(x, y, mlx);
 			mlx->loopx++;
 		}
@@ -72,20 +73,19 @@ int	mandelbrot(t_data *mlx)
 }
 
 
-void	start_mandelbrot(void)
+void	start_mandelbrot(t_data *mlx)
 {
-	t_data	mlx;
-
-	mlx.mlx = mlx_init();
-	mlx.win = mlx_new_window(mlx.mlx, SIZEX, SIZEY, "Fract'ol");
-	mlx.xmin = MINX;
-	mlx.xmax = MAXX;
-	mlx.ymin = MINY;
-	mlx.ymax = MAXY;
-	mlx.color = 0;
-	mlx.fractol = 1;
-	mandelbrot((void *)&mlx);
-	mlx_hook(mlx.win, 17, 2, ft_exit, (void *)0);
-	mlx_mouse_hook(mlx.win, zoom, (void *)&mlx);
-	mlx_loop(mlx.mlx);
+	mlx->mlx = mlx_init();
+	mlx->win = mlx_new_window(mlx->mlx, SIZEX, SIZEY, "Fract'ol");
+	mlx->xmin = MINX;
+	mlx->xmax = MAXX;
+	mlx->ymin = MINY;
+	mlx->ymax = MAXY;
+	mlx->color = 0;
+	mlx->fractol = 1;
+	mandelbrot((void *)mlx);
+	mlx_hook(mlx->win, 17, 2, ft_exit, (void *)0);
+	mlx_hook(mlx->win, 2, 61, ft_exit, (void *)0);
+	mlx_mouse_hook(mlx->win, zoom, mlx);
+	mlx_loop(mlx->mlx);
 }
