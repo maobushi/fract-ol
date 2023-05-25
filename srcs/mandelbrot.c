@@ -6,41 +6,52 @@
 /*   By: mobushi <mobushi@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/14 20:21:36 by mobushi           #+#    #+#             */
-/*   Updated: 2023/05/15 18:36:51 by mobushi          ###   ########.fr       */
+/*   Updated: 2023/05/19 17:35:12 by mobushi          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "fractol.h"
-#include <math.h>
+
+double	put_pixel_window(t_data*mlx, double x, double y, int flag)
+{
+	if (mlx->fractol_type == 0 && flag == 0)
+		return (0);
+	else if (mlx->fractol_type == 0 && flag == 1)
+		return (0);
+	else if (mlx->fractol_type == 0 && flag == 2)
+		return (x);
+	else if (mlx->fractol_type == 0 && flag == 3)
+		return (y);
+	else if (mlx->fractol_type != 0 && flag == 0)
+		return (x);
+	else if (mlx->fractol_type != 0 && flag == 1)
+		return (y);
+	else if (mlx->fractol_type != 0 && flag == 2)
+		return (0);
+	else if (mlx->fractol_type != 0 && flag == 3)
+		return (0);
+	return (0);
+}
 
 int	mandelbrot_set(double x, double y, t_data *mlx)
 {
 	int		i;
-	double	xx;
-	double	yy;
-	double	temp;
 
-	if (mlx->fractol_type == 0)
-	{
-		xx = 0;
-		yy = 0;
-	}
-	else
-	{
-		xx = x;
-		yy = y;
-	}
+	mlx->real = put_pixel_window(mlx, x, y, 0);
+	mlx->imag = put_pixel_window(mlx, x, y, 1);
+	x = put_pixel_window(mlx, x, y, 2);
+	y = put_pixel_window(mlx, x, y, 3);
 	i = 1;
 	while (i < MAX_ITER)
 	{
-		temp = xx;
-		xx = ((xx * xx) - (yy * yy)) + x;
-		yy = (2 * temp * yy) + y;
-		xx += (double)mlx->fractol_type;
-		yy += (double)mlx->fractol_type;
-		if ((xx * xx) + (yy * yy) > 4)
+		mlx->tmp = mlx->real;
+		mlx->real = ((mlx->real * mlx->real) - (mlx->imag * mlx->imag)) + x;
+		mlx->imag = (2 * mlx->tmp * mlx->imag) + y;
+		mlx->real += (((double)mlx->fractol_type) / 1000) * -1;
+		mlx->imag += ((double)mlx->fractol_type) / 1000;
+		if ((mlx->real * mlx->real) + (mlx->imag * mlx->imag) > 4)
 		{
-			mlx_pixel_put(mlx->mlx, mlx->win, mlx->loopx,mlx->loopy, 0xE00009EA * i);
+			mlx_pixel_put(mlx->mlx, mlx->win, mlx->loopx, mlx->loopy, CLR * i);
 			return (0);
 		}
 		i++;
@@ -61,8 +72,10 @@ int	mandelbrot(t_data *mlx)
 	{
 		while (mlx->loopx < SIZEX)
 		{
-			x = (double)mlx->xmin + ((double)mlx->loopx * (((double)mlx->xmax - (double)mlx->xmin) / (double)SIZEX));
-			y = (double)mlx->ymax - ((double)mlx->loopy * (((double)mlx->ymax - (double)mlx->ymin) / (double)SIZEY));
+			x = (double)mlx->xmin + ((double)mlx->loopx * (((double)mlx->xmax
+							- (double)mlx->xmin) / (double)SIZEX));
+			y = (double)mlx->ymax - ((double)mlx->loopy * (((double)mlx->ymax
+							- (double)mlx->ymin) / (double)SIZEY));
 			mandelbrot_set(x, y, mlx);
 			mlx->loopx++;
 		}
@@ -71,7 +84,6 @@ int	mandelbrot(t_data *mlx)
 	}
 	return (1);
 }
-
 
 void	start_mandelbrot(t_data *mlx)
 {
@@ -85,7 +97,7 @@ void	start_mandelbrot(t_data *mlx)
 	mlx->fractol = 1;
 	mandelbrot((void *)mlx);
 	mlx_hook(mlx->win, 17, 2, ft_exit, (void *)0);
-	mlx_hook(mlx->win, 2, 61, ft_exit, (void *)0);
+	mlx_key_hook(mlx->win, ft_exit_esc, mlx);
 	mlx_mouse_hook(mlx->win, zoom, mlx);
 	mlx_loop(mlx->mlx);
 }
